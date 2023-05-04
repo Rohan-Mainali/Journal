@@ -1,9 +1,20 @@
 import './App.css'
+import Home from './pages/Home/Home'
+import {
+    Navigate,
+    BrowserRouter as Router,
+    Route,
+    Routes,
+} from 'react-router-dom'
 
 function App() {
     return (
         <>
-            <h1 className="text-3xl font-bold underline ">Journal App</h1>
+            <Router>
+                <Routes>
+                    <Route path="/" element={<Home />} />
+                </Routes>
+            </Router>
         </>
     )
 }
