@@ -1,13 +1,69 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment, useState } from 'react'
+import { Formik, Form, FormikProps } from 'formik'
+import CardProps from '../../types/CardProps'
+import axios from 'axios'
+import * as Yup from 'yup'
 
 interface ModalProps {
     isOpen: boolean
     changeModalState: () => void
 }
 
+interface IFormStatus {
+    message: string
+    type: string
+}
+
+interface IFormStatusProps {
+    [key: string]: IFormStatus
+}
+
+const formStatusProps: IFormStatusProps = {
+    success: {
+        message: 'Signed up successfully.',
+        type: 'success',
+    },
+    duplicate: {
+        message: 'Email-id already exist. Please use different email-id.',
+        type: 'error',
+    },
+    error: {
+        message: 'Something went wrong. Please try again.',
+        type: 'error',
+    },
+}
+
+const formValidationSchema = Yup.object().shape({
+    title: Yup.string().required('Please enter journal title'),
+    body: Yup.string().required('Please enter journal body'),
+})
+
 export default function MyModal({ isOpen, changeModalState }: ModalProps) {
-    const addJournal = () => console.log('add journal')
+    const [displayFormStatus, setDisplayFormStatus] = useState(false)
+    const [formStatus, setFormStatus] = useState<IFormStatus>({
+        message: '',
+        type: '',
+    })
+
+    const createNewJournal = async (data: CardProps, resetForm: () => void) => {
+        try {
+            const obj = data
+            obj.date = new Date()
+            const response = await axios.post(
+                'http://localhost:3001/api/v1/journal',
+                obj
+            )
+            console.log(response)
+            if (data) {
+                resetForm({})
+            }
+        } catch (error) {
+            console.log(error)
+        } finally {
+            changeModalState()
+        }
+    }
     return (
         <>
             {' '}
@@ -47,29 +103,89 @@ export default function MyModal({ isOpen, changeModalState }: ModalProps) {
                                     >
                                         Add Journal
                                     </Dialog.Title>
-                                    <div className="mt-2">
-                                        <form onSubmit={addJournal}>
-                                            <input
-                                                type="text"
-                                                placeholder="journal title"
-                                            ></input>
-                                        </form>
-                                        <p className="text-sm text-gray-500">
-                                            Your payment has been successfully
-                                            submitted. We’ve sent you an email
-                                            with all of the details of your
-                                            order.
-                                        </p>
-                                    </div>
-
-                                    <div className="mt-4">
-                                        <button
-                                            type="button"
-                                            className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                                            onClick={changeModalState}
+                                    <div className="mt-2 felx flex-col">
+                                        <Formik
+                                            initialValues={{
+                                                title: '',
+                                                body: '',
+                                                date: '',
+                                            }}
+                                            onSubmit={(
+                                                values: CardProps,
+                                                actions
+                                            ) => {
+                                                createNewJournal(
+                                                    values,
+                                                    actions.resetForm
+                                                )
+                                            }}
+                                            validationSchema={
+                                                formValidationSchema
+                                            }
                                         >
-                                            Got it, thanks!
-                                        </button>
+                                            {(
+                                                props: FormikProps<ISignUpForm>
+                                            ) => {
+                                                const {
+                                                    values,
+                                                    touched,
+                                                    errors,
+                                                    handleBlur,
+                                                    handleChange,
+                                                    isSubmitting,
+                                                } = props
+                                                return (
+                                                    <Form className="flex flex-col gap-x-2">
+                                                        <input
+                                                            className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-0 focus:border-gray-500 block w-full p-2.5"
+                                                            name="title"
+                                                            id="titel"
+                                                            value={values.title}
+                                                            type="text"
+                                                            onChange={
+                                                                handleChange
+                                                            }
+                                                            onBlur={handleBlur}
+                                                        ></input>
+                                                        {touched.title &&
+                                                            errors.title && (
+                                                                <div className="text-red-500 text-sm py-2 text-left">
+                                                                    {
+                                                                        errors.title
+                                                                    }
+                                                                </div>
+                                                            )}
+                                                        <input
+                                                            className=" mt-3 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-0 focus:border-gray-500 block w-full p-2.5"
+                                                            name="body"
+                                                            id="body"
+                                                            value={values.body}
+                                                            type="text"
+                                                            onChange={
+                                                                handleChange
+                                                            }
+                                                            onBlur={handleBlur}
+                                                        ></input>
+                                                        {touched.body &&
+                                                            errors.body && (
+                                                                <div className="text-red-500 text-sm py-2 text-left">
+                                                                    {
+                                                                        errors.body
+                                                                    }
+                                                                </div>
+                                                            )}
+                                                        <button
+                                                            className="mt-3 p-2 bg-indigo-800 text-white "
+                                                            type="submit"
+                                                            variant="contained"
+                                                            color="secondary"
+                                                        >
+                                                            Submit
+                                                        </button>
+                                                    </Form>
+                                                )
+                                            }}
+                                        </Formik>
                                     </div>
                                 </Dialog.Panel>
                             </Transition.Child>

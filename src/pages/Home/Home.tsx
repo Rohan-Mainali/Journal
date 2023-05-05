@@ -31,7 +31,7 @@ function Home() {
                 </button>
                 <AddModal isOpen={isOpen} changeModalState={changeModalState} />
             </div>
-            <div className="journals mt-3">
+            <div className="journals mt-3 flex flex-col gap-y-3">
                 {journals?.map((journal: CardProps, index: number) => {
                     return (
                         <>
