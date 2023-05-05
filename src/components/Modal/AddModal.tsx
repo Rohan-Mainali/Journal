@@ -1,7 +1,8 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment, useState } from 'react'
-import { Formik, Form, FormikProps } from 'formik'
+import { Formik, Form, FormikProps, Field, ErrorMessage } from 'formik'
 import CardProps from '../../types/CardProps'
+import { journalInitialValue } from '../../constants/Constant'
 import axios from 'axios'
 import * as Yup from 'yup'
 
@@ -10,42 +11,12 @@ interface ModalProps {
     changeModalState: () => void
 }
 
-interface IFormStatus {
-    message: string
-    type: string
-}
-
-interface IFormStatusProps {
-    [key: string]: IFormStatus
-}
-
-const formStatusProps: IFormStatusProps = {
-    success: {
-        message: 'Signed up successfully.',
-        type: 'success',
-    },
-    duplicate: {
-        message: 'Email-id already exist. Please use different email-id.',
-        type: 'error',
-    },
-    error: {
-        message: 'Something went wrong. Please try again.',
-        type: 'error',
-    },
-}
-
 const formValidationSchema = Yup.object().shape({
     title: Yup.string().required('Please enter journal title'),
     body: Yup.string().required('Please enter journal body'),
 })
 
 export default function MyModal({ isOpen, changeModalState }: ModalProps) {
-    const [displayFormStatus, setDisplayFormStatus] = useState(false)
-    const [formStatus, setFormStatus] = useState<IFormStatus>({
-        message: '',
-        type: '',
-    })
-
     const createNewJournal = async (data: CardProps, resetForm: () => void) => {
         try {
             const obj = data
@@ -64,6 +35,11 @@ export default function MyModal({ isOpen, changeModalState }: ModalProps) {
             changeModalState()
         }
     }
+
+    const handleSubmit = (values, actions) => {
+        createNewJournal(values, actions.resetForm)
+    }
+
     return (
         <>
             {' '}
@@ -105,26 +81,14 @@ export default function MyModal({ isOpen, changeModalState }: ModalProps) {
                                     </Dialog.Title>
                                     <div className="mt-2 felx flex-col">
                                         <Formik
-                                            initialValues={{
-                                                title: '',
-                                                body: '',
-                                                date: '',
-                                            }}
-                                            onSubmit={(
-                                                values: CardProps,
-                                                actions
-                                            ) => {
-                                                createNewJournal(
-                                                    values,
-                                                    actions.resetForm
-                                                )
-                                            }}
+                                            initialValues={journalInitialValue}
+                                            onSubmit={handleSubmit}
                                             validationSchema={
                                                 formValidationSchema
                                             }
                                         >
                                             {(
-                                                props: FormikProps<ISignUpForm>
+                                                props: FormikProps<CardProps>
                                             ) => {
                                                 const {
                                                     values,
@@ -136,44 +100,34 @@ export default function MyModal({ isOpen, changeModalState }: ModalProps) {
                                                 } = props
                                                 return (
                                                     <Form className="flex flex-col gap-x-2">
-                                                        <input
+                                                        <label>
+                                                            Journal Title
+                                                        </label>
+                                                        <Field
                                                             className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-0 focus:border-gray-500 block w-full p-2.5"
                                                             name="title"
-                                                            id="titel"
-                                                            value={values.title}
+                                                            id="title"
                                                             type="text"
-                                                            onChange={
-                                                                handleChange
-                                                            }
-                                                            onBlur={handleBlur}
-                                                        ></input>
-                                                        {touched.title &&
-                                                            errors.title && (
-                                                                <div className="text-red-500 text-sm py-2 text-left">
-                                                                    {
-                                                                        errors.title
-                                                                    }
-                                                                </div>
-                                                            )}
-                                                        <input
-                                                            className=" mt-3 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-0 focus:border-gray-500 block w-full p-2.5"
+                                                        />
+                                                        <ErrorMessage
+                                                            name="title"
+                                                            component="div"
+                                                            className="text-red-500 text-sm"
+                                                        />
+                                                        <label>
+                                                            Description
+                                                        </label>
+                                                        <Field
+                                                            className="mt-3 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-0 focus:border-gray-500 block w-full p-2.5"
                                                             name="body"
                                                             id="body"
-                                                            value={values.body}
-                                                            type="text"
-                                                            onChange={
-                                                                handleChange
-                                                            }
-                                                            onBlur={handleBlur}
-                                                        ></input>
-                                                        {touched.body &&
-                                                            errors.body && (
-                                                                <div className="text-red-500 text-sm py-2 text-left">
-                                                                    {
-                                                                        errors.body
-                                                                    }
-                                                                </div>
-                                                            )}
+                                                            as="textarea"
+                                                        />
+                                                        <ErrorMessage
+                                                            name="body"
+                                                            component="div"
+                                                            className="text-red-500 text-sm"
+                                                        />
                                                         <button
                                                             className="mt-3 p-2 bg-indigo-800 text-white "
                                                             type="submit"
