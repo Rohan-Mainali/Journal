@@ -21,7 +21,10 @@ export default function MyModal({ isOpen, changeModalState }: ModalProps) {
   const createNewJournal = async (data: JournalType, resetForm: () => void) => {
     try {
       const obj = data
-      obj.date = new Date()
+      const today = new Date()
+      const dateString = today.toISOString().substring(0, 10)
+      console.log(dateString)
+      obj.date = dateString
       const response = await axios.post(
         'http://localhost:3001/api/v1/journal',
         obj
@@ -82,7 +85,7 @@ export default function MyModal({ isOpen, changeModalState }: ModalProps) {
                       onSubmit={handleSubmit}
                       validationSchema={formValidationSchema}
                     >
-                      {(props: FormikProps<CardProps>) => {
+                      {() => {
                         return (
                           <Form className="flex flex-col gap-x-2">
                             <label>Journal Title</label>

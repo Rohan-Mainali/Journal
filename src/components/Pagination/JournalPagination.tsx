@@ -12,6 +12,7 @@ interface Props {
 const JournalsPagination: React.FC<Props> = ({ itemsPerPage }) => {
   const urlLocation = useLocation()
   const navigate = useNavigate()
+  const url = 'http://localhost:3001/api/v1'
   const [journals, setJournals] = useState<CardProps[]>([])
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [totalPages, setTotalPages] = useState<number>(0)
@@ -21,6 +22,7 @@ const JournalsPagination: React.FC<Props> = ({ itemsPerPage }) => {
   const searchParams = new URLSearchParams(urlLocation.search)
   const [pageCount, setPageCount] = useState(0)
   const [itemCount, setItemCount] = useState(itemsPerPage)
+  const [searchDate, setSearchDate] = useState<string>('')
 
   useEffect(() => {
     setCurrentPage(searchParams.get('page') || 1)
@@ -52,30 +54,30 @@ const JournalsPagination: React.FC<Props> = ({ itemsPerPage }) => {
     navigate(`?page=${parseInt(currentPage) + 1}&items=${itemsPerPage}`)
   }
 
+  const handleSearch = async () => {
+    setSearchDate(event.target.value)
+    setIsSearch(true)
+  }
+
+  const fetchByDate = async (date: string) => {
+    const response = await axios.get(`${url}/journal?date=${date}`)
+    setJournals(response.data.data)
+    setIsSearch(true)
+  }
+
+  useEffect(() => {
+    fetchByDate(searchDate)
+  }, [searchDate])
+
   const canGoBack = currentPage > 1
   const canGoForward = journals.length >= itemsPerPage
 
   // search filter for date
-  const [searchDate, setSearchDate] = useState<string>('')
 
   // function to handle search query
   const handleSearchQuery = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value)
   }
-
-  // filter the journals array based on the search query
-  const filteredJournals = journals.filter((journal) => {
-    // get the timestamp of the journal date
-    const journalDate = new Date(journal.date)
-    const userDate = new Date(searchDate)
-
-    return (
-      journalDate.getDate() === userDate.getDate() &&
-      journalDate.getMonth() === userDate.getMonth() &&
-      journalDate.getFullYear() === userDate.getFullYear()
-    )
-  })
-
   return (
     <div className="journals mt-3 flex flex-col gap-y-3">
       <div className="mb-5 w-1/5">
@@ -84,16 +86,13 @@ const JournalsPagination: React.FC<Props> = ({ itemsPerPage }) => {
           className="border-2 border-gray-200 p-2 w-full"
           placeholder="Search by date (YYYY-MM-DD)"
           value={searchDate}
-          onChange={(event) => {
-            setSearchDate(event.target.value)
-            setIsSearch(true)
-          }}
+          onChange={handleSearch}
         />
       </div>
 
       {isSearch ? (
         <>
-          {filteredJournals.map((journal, index) => (
+          {journals.map((journal, index) => (
             <Link to={`/journal/${journal.id}`}>
               <div key={index}>
                 <Card
