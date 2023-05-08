@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import CardProps from '../../types/CardProps'
 import Card from '../Card/Card'
 import { Link } from 'react-router-dom'
@@ -9,12 +10,22 @@ interface Props {
 }
 
 const JournalsPagination: React.FC<Props> = ({ itemsPerPage }) => {
+  const urlLocation = useLocation()
+  const navigate = useNavigate()
   const [journals, setJournals] = useState<CardProps[]>([])
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [totalPages, setTotalPages] = useState<number>(0)
   const [isSearch, setIsSearch] = useState<number>(0)
   const [totalJournal, setTotalJournal] = useState<number>(0)
   const [totalFetchedJournal, setTotalFetchedJournal] = useState<number>(0)
+  const searchParams = new URLSearchParams(urlLocation.search)
+  const [pageCount, setPageCount] = useState(0)
+  const [itemCount, setItemCount] = useState(itemsPerPage)
+
+  useEffect(() => {
+    setCurrentPage(searchParams.get('page') || 1)
+    setItemCount(searchParams.get('items') || itemsPerPage)
+  }, [searchParams])
 
   useEffect(() => {
     fetchJournals()
@@ -22,7 +33,7 @@ const JournalsPagination: React.FC<Props> = ({ itemsPerPage }) => {
 
   const fetchJournals = async () => {
     const response = await axios.get(
-      `http://localhost:3001/api/v1/journal?page=${currentPage}&take=${itemsPerPage}`
+      `http://localhost:3001/api/v1/journal?page=${currentPage}&take=${itemCount}`
     )
     const journalData = response.data.data
     setJournals(journalData)
@@ -34,10 +45,12 @@ const JournalsPagination: React.FC<Props> = ({ itemsPerPage }) => {
 
   const handlePreviousPage = () => {
     setCurrentPage((prevPage) => prevPage - 1)
+    navigate(`?page=${currentPage - 1}&items=${itemsPerPage}`)
   }
 
   const handleNextPage = () => {
-    setCurrentPage((prevPage) => prevPage + 1)
+    setCurrentPage(currentPage + 1)
+    navigate(`?page=${parseInt(currentPage) + 1}&items=${itemsPerPage}`)
   }
 
   const canGoBack = currentPage > 1
@@ -122,6 +135,7 @@ const JournalsPagination: React.FC<Props> = ({ itemsPerPage }) => {
         >
           Previous Page
         </button>
+
         <button
           className="bg-indigo-900 p-3 rounded-lg text-white"
           onClick={handleNextPage}

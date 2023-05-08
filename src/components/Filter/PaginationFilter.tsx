@@ -2,15 +2,17 @@ import { Fragment, useState, useEffect } from 'react'
 import { Listbox, Transition } from '@headlessui/react'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
 
-const itemsPerPageOptions = [
-  { count: 1 },
-  { count: 5 },
-  { count: 10 },
-  { count: 20 },
-]
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
+
+const itemsPerPageOptions = [{ count: 5 }, { count: 10 }, { count: 20 }]
 
 export default function PaginationFilter({ changeItemsPerPage }: () => void) {
-  const [selected, setSelected] = useState(itemsPerPageOptions[0])
+  const urlLocation = useLocation()
+  const searchParams = new URLSearchParams(urlLocation.search)
+  const item = searchParams.get('items')
+  const [selected, setSelected] = useState({
+    count: item ? item : itemsPerPageOptions[0].count,
+  })
 
   useEffect(() => {
     changeItemsPerPage(selected.count)
