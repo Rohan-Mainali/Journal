@@ -1,7 +1,7 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment, useState } from 'react'
 import { Formik, Form, FormikProps, Field, ErrorMessage } from 'formik'
-import CardProps from '../../types/CardProps'
+import JournalType from '../../types/JournalType'
 import { journalInitialValue } from '../../constants/Constant'
 import axios from 'axios'
 import * as Yup from 'yup'
@@ -18,7 +18,7 @@ const formValidationSchema = Yup.object().shape({
 
 export default function MyModal({ isOpen, changeModalState }: ModalProps) {
   // use promise
-  const createNewJournal = async (data: CardProps, resetForm: () => void) => {
+  const createNewJournal = async (data: JournalType, resetForm: () => void) => {
     try {
       const obj = data
       obj.date = new Date()

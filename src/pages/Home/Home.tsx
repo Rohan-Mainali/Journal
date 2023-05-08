@@ -12,9 +12,10 @@ function Home() {
   const urlLocation = useLocation()
   const [journals, setJournals] = useState()
   const [isOpen, setIsOpen] = useState(false)
-  const [itemsPerPage, setItemsPerPage] = useState<number>(2)
   const searchParams = new URLSearchParams(urlLocation.search)
-
+  const [itemsPerPage, setItemsPerPage] = useState<number>(
+    searchParams.get('items')
+  )
   // function to change model open or close state
   const changeModalState = () => setIsOpen(!isOpen)
 

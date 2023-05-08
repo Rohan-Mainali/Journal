@@ -1,5 +1,5 @@
 import React from 'react'
-import { CardProps } from '../../types/CardProps'
+import { JournalType } from '../../types/JournalType'
 
 function Card({ id, title, date, body }: CardProps) {
   const newdate = new Date(date)

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import CardProps from '../../types/CardProps'
+import { JournalType } from '../../types/CardProps'
 import Card from '../Card/Card'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
@@ -26,10 +26,9 @@ const JournalsPagination: React.FC<Props> = ({ itemsPerPage }) => {
     setCurrentPage(searchParams.get('page') || 1)
     setItemCount(searchParams.get('items') || itemsPerPage)
   }, [searchParams])
-
   useEffect(() => {
     fetchJournals()
-  }, [currentPage])
+  }, [itemCount, currentPage])
 
   const fetchJournals = async () => {
     const response = await axios.get(
@@ -54,7 +53,7 @@ const JournalsPagination: React.FC<Props> = ({ itemsPerPage }) => {
   }
 
   const canGoBack = currentPage > 1
-  const canGoForward = journals.length === itemsPerPage
+  const canGoForward = journals.length >= itemsPerPage
 
   // search filter for date
   const [searchDate, setSearchDate] = useState<string>('')
