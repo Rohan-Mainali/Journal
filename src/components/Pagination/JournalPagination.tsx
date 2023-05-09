@@ -1,48 +1,29 @@
-import React, { useEffect, useState } from 'react'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import { JournalType } from '../../types/CardProps'
-import Card from '../Card/Card'
-import { Link } from 'react-router-dom'
 import axios from 'axios'
+import React, { useEffect, useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { useJournals } from '../../hooks/use-journals'
+import Card from '../Card/Card'
 
-interface Props {
-  itemsPerPage: number
-}
+const url = 'http://localhost:3001/api/v1'
 
-const JournalsPagination: React.FC<Props> = ({ itemsPerPage }) => {
-  const urlLocation = useLocation()
+const JournalsPagination = () => {
   const navigate = useNavigate()
-  const url = 'http://localhost:3001/api/v1'
-  const [journals, setJournals] = useState<CardProps[]>([])
+  const [sParams] = useSearchParams()
+
   const [currentPage, setCurrentPage] = useState<number>(1)
-  const [totalPages, setTotalPages] = useState<number>(0)
   const [isSearch, setIsSearch] = useState<number>(0)
-  const [totalJournal, setTotalJournal] = useState<number>(0)
-  const [totalFetchedJournal, setTotalFetchedJournal] = useState<number>(0)
-  const searchParams = new URLSearchParams(urlLocation.search)
-  const [pageCount, setPageCount] = useState(0)
-  const [itemCount, setItemCount] = useState(itemsPerPage)
+  const [totalJournal] = useState<number>(0)
+  const [totalFetchedJournal] = useState<number>(0)
+
+  const itemsPerPage = Number.parseInt(sParams.get('items') ?? '5')
+  const page = Number.parseInt(sParams.get('page') ?? '1')
+
+  const { data: journals } = useJournals({
+    itemCount: itemsPerPage,
+    page,
+  })
+
   const [searchDate, setSearchDate] = useState<string>('')
-
-  useEffect(() => {
-    setCurrentPage(searchParams.get('page') || 1)
-    setItemCount(searchParams.get('items') || itemsPerPage)
-  }, [searchParams])
-  useEffect(() => {
-    fetchJournals()
-  }, [itemCount, currentPage])
-
-  const fetchJournals = async () => {
-    const response = await axios.get(
-      `http://localhost:3001/api/v1/journal?page=${currentPage}&take=${itemCount}`
-    )
-    const journalData = response.data.data
-    setJournals(journalData)
-    const total = journalData.length
-    setTotalFetchedJournal(total)
-    setTotalPages(Math.ceil(total / itemsPerPage))
-    setTotalJournal(response.data.metadata.total)
-  }
 
   const handlePreviousPage = () => {
     setCurrentPage((prevPage) => prevPage - 1)
@@ -50,8 +31,7 @@ const JournalsPagination: React.FC<Props> = ({ itemsPerPage }) => {
   }
 
   const handleNextPage = () => {
-    setCurrentPage(currentPage + 1)
-    navigate(`?page=${parseInt(currentPage) + 1}&items=${itemsPerPage}`)
+    navigate(`?page=${page + 1}&items=${itemsPerPage}`)
   }
 
   const handleSearch = async () => {
@@ -59,25 +39,9 @@ const JournalsPagination: React.FC<Props> = ({ itemsPerPage }) => {
     setIsSearch(true)
   }
 
-  const fetchByDate = async (date: string) => {
-    const response = await axios.get(`${url}/journal?date=${date}`)
-    setJournals(response.data.data)
-    setIsSearch(true)
-  }
-
-  useEffect(() => {
-    fetchByDate(searchDate)
-  }, [searchDate])
-
   const canGoBack = currentPage > 1
   const canGoForward = journals.length >= itemsPerPage
 
-  // search filter for date
-
-  // function to handle search query
-  const handleSearchQuery = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value)
-  }
   return (
     <div className="journals mt-3 flex flex-col gap-y-3">
       <div className="mb-5 w-1/5">

@@ -1,32 +1,12 @@
-import { useEffect, useState } from 'react'
-import axios from 'axios'
-import { useNavigate, useLocation } from 'react-router-dom'
-import Card from '../../components/Card/Card'
-import AddModal from '../../components/Modal/AddModal'
-import { CardProps } from '../../types/CardProps'
-import JournalsPagination from '../../components/Pagination/JournalPagination'
+import { useState } from 'react'
 import PaginationFilter from '../../components/Filter/PaginationFilter'
+import AddModal from '../../components/Modal/AddModal'
+import JournalsPagination from '../../components/Pagination/JournalPagination'
 
 function Home() {
-  const navigate = useNavigate()
-  const urlLocation = useLocation()
-  const [journals, setJournals] = useState()
   const [isOpen, setIsOpen] = useState(false)
-  const searchParams = new URLSearchParams(urlLocation.search)
-  const [itemsPerPage, setItemsPerPage] = useState<number>(
-    searchParams.get('items') || 5
-  )
-  // function to change model open or close state
-  const changeModalState = () => setIsOpen(!isOpen)
 
-  //function to change filter of pagination
-  const changeItemsPerPage = (itemsCount: number) => {
-    setItemsPerPage(itemsCount)
-  }
-  useEffect(() => {
-    searchParams.set('items', itemsPerPage.toString())
-    navigate(`/?${searchParams.toString()}`)
-  }, [itemsPerPage])
+  const changeModalState = () => setIsOpen(!isOpen)
 
   return (
     <>
@@ -40,8 +20,8 @@ function Home() {
         </button>
         <AddModal isOpen={isOpen} changeModalState={changeModalState} />
       </div>
-      <PaginationFilter changeItemsPerPage={changeItemsPerPage} />
-      <JournalsPagination key={itemsPerPage} itemsPerPage={itemsPerPage} />
+      <PaginationFilter />
+      <JournalsPagination />
     </>
   )
 }

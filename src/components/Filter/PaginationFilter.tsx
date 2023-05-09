@@ -1,26 +1,26 @@
-import { Fragment, useState, useEffect } from 'react'
 import { Listbox, Transition } from '@headlessui/react'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
+import { Fragment } from 'react'
 
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 const itemsPerPageOptions = [{ count: 5 }, { count: 10 }, { count: 20 }]
 
-export default function PaginationFilter({ changeItemsPerPage }: () => void) {
-  const urlLocation = useLocation()
-  const searchParams = new URLSearchParams(urlLocation.search)
-  const item = searchParams.get('items')
-  const [selected, setSelected] = useState({
-    count: item ? item : itemsPerPageOptions[0].count,
-  })
+export default function PaginationFilter() {
+  const [params] = useSearchParams()
+  const navigate = useNavigate()
 
-  useEffect(() => {
-    changeItemsPerPage(selected.count)
-  }, [selected])
+  const selected = { count: params.get('items') || 5 }
+
+  const onChange = (value: { count: string }) => {
+    params.set('items', value.count)
+    const search = params.toString()
+    navigate(`/?${search}`)
+  }
 
   return (
     <div className="top-16 w-1/5 z-10">
-      <Listbox value={selected} onChange={setSelected}>
+      <Listbox value={selected} onChange={onChange}>
         <div className="relative mt-1">
           <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
             <span className="block truncate">{selected.count}</span>

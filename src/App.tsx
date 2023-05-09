@@ -1,12 +1,12 @@
+import {
+  Navigate,
+  Route,
+  BrowserRouter as Router,
+  Routes,
+} from 'react-router-dom'
 import './App.css'
 import Home from './pages/Home/Home'
 import Journal from './pages/Journal/Journal'
-import {
-  Navigate,
-  BrowserRouter as Router,
-  Route,
-  Routes,
-} from 'react-router-dom'
 
 function App() {
   return (
@@ -14,8 +14,6 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
-        </Routes>
-        <Routes>
           <Route path="/journal/:id" element={<Journal />} />
         </Routes>
       </Router>
